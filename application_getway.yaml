@@ -1,0 +1,127 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: GETWAY_PVVIH
+  cloud:
+    config:
+      enabled: false
+    gateway:
+      httpclient:
+        connect-timeout: 10000
+        response-timeout: 30s
+      discovery:
+        locator:
+          enabled: true  # Active la découverte automatique
+          lower-case-service-id: true
+      default-filters:
+        - AddRequestHeader=X-Forwarded-Proto, http
+        - AddRequestHeader=X-Forwarded-Host, gateway-pvvih:8080
+        - PreserveHostHeader
+      routes:
+        # Route pour USER_API_PVVIH - Auth endpoints avec rewrite (doit être AVANT la route directe)
+        - id: user-api-auth-rewrite
+          uri: http://gestion-user:8080
+          predicates:
+            - Path=/api/user-auth/**
+          filters:
+            - RewritePath=/api/user-auth/(?<path>.*), /api/auth/$\{path}
+            - RemoveRequestHeader=Cookie
+            - RemoveRequestHeader=Set-Cookie
+        
+        # Route pour USER_API_PVVIH - Auth endpoints directs (login, register)
+        - id: user-api-auth
+          uri: http://gestion-user:8080
+          predicates:
+            - Path=/api/auth/**
+
+        # Route pour USER_API_PVVIH - Direct API endpoints (gère aussi /api/patients)
+        - id: user-api-direct
+          uri: http://gestion-user:8080
+          predicates:
+            - Path=/api/users/**, /api/doctors/**, /api/membres/**, /api/patients/**, /api/hospitaux/**, /api/associations/**, /api/assistants/**
+
+        # Route pour USER_API_PVVIH - Alternative spellings (need rewrite)
+        - id: user-api-alternatives
+          uri: http://gestion-user:8080
+          predicates:
+            - Path=/api/hopitaux/**, /hospitaux/**, /hopitaux/**
+          filters:
+            - RewritePath=/api/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
+            - RewritePath=/hospitaux/(?<path>.*), /api/hospitaux/$\{path}
+            - RewritePath=/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
+
+        # Route pour USER_API_PVVIH - Service direct access
+        - id: user-api-service
+          uri: http://gestion-user:8080
+          predicates:
+            - Path=/user_api_pvvih/**
+          filters:
+            - RewritePath=/user_api_pvvih/(?<path>.*), /$\{path}
+
+        # Route pour PATIENT_PVVIH - Dossiers médicaux (PAS /api/patients qui est dans user service)
+        - id: patient-pvvih
+          uri: http://gestion-patient:8080
+          predicates:
+            - Path=/api/patients-proxy/**, /api/dossiers/**, /api/user-integration/**, /patient_pvvih/**
+          filters:
+            - RewritePath=/api/patients-proxy/(?<path>.*), /api/patients/$\{path}
+            - RewritePath=/patient_pvvih/(?<path>.*), /$\{path}
+
+        # Route pour FORUM_PVVIH - toutes les routes
+        - id: forum-pvvih
+          uri: http://forum-pvvih:8080
+          predicates:
+            - Path=/api/sujets/**, /api/commentaires/**, /api/translation/**, /api/forum-auth/**, /api/admin/sections/**, /forum_pvvih/**
+          filters:
+            - RewritePath=/api/sujets/(?<path>.*), /$\{path}
+            - RewritePath=/api/commentaires/(?<path>.*), /$\{path}
+            - RewritePath=/api/translation/(?<path>.*), /$\{path}
+            - RewritePath=/api/forum-auth/(?<path>.*), /api/auth/$\{path}
+            - RewritePath=/api/admin/sections/(?<path>.*), /$\{path}
+            - RewritePath=/forum_pvvih/(?<path>.*), /$\{path}
+
+        # Route pour REFERENCEMENT_PVVIH - toutes les routes
+        - id: referencement-pvvih
+          uri: http://gestion-reference:8080
+          predicates:
+            - Path=/api/references/**, /api/contre-references/**, /api/hopitaux-proxy/**, /api/integration/**, /api/reference-auth/**, /reference_pvvih/**
+          filters:
+            - RewritePath=/api/reference-auth/(?<path>.*), /api/auth/$\{path}
+            - RewritePath=/reference_pvvih/(?<path>.*), /$\{path}
+
+
+# Eureka configuration
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: http://api-register:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${server.port}}
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.cors: DEBUG
+    reactor.netty: DEBUG
+    org.springframework.cloud.gateway.route: DEBUG
+    org.springframework.cloud.gateway.filter: DEBUG
