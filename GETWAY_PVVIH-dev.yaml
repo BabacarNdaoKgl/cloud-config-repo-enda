@@ -4,9 +4,9 @@ server:
 spring:
   application:
     name: GETWAY_PVVIH
+  # NE PAS désactiver le Config Server !
+  # spring.cloud.config.enabled: false  <- SUPPRIMER CETTE LIGNE
   cloud:
-    config:
-      enabled: false
     gateway:
       httpclient:
         connect-timeout: 10000
@@ -90,7 +90,6 @@ spring:
           filters:
             - RewritePath=/api/reference-auth/(?<path>.*), /api/auth/$\{path}
             - RewritePath=/reference_pvvih/(?<path>.*), /$\{path}
-
 
 # Eureka configuration
 eureka:
