@@ -40,7 +40,7 @@ spring:
         - id: user-api-direct
           uri: http://gestion-user:8080
           predicates:
-            - Path=/api/users/**,/api/user/**, /api/doctors/**, /api/membres/**, /api/patients/**, /api/hospitaux/**, /api/associations/**, /api/assistants/**
+            - Path=/api/users/**,/api/user/**,/api/auth/**,/api/doctors/**, /api/membres/**, /api/patients/**, /api/hospitaux/**, /api/associations/**, /api/assistants/**
 
         # Route pour USER_API_PVVIH - Alternative spellings (need rewrite)
         - id: user-api-alternatives
