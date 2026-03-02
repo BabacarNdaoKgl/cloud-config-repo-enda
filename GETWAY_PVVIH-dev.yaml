@@ -1,3 +1,11 @@
+# ============================================================================
+# Configuration Spring Cloud Gateway pour GETWAY_PVVIH
+# ============================================================================
+# Fichier à placer dans votre repository GitHub de configuration
+# Nom: GETWAY_PVVIH-prod.yml (pour production)
+# URL du repo: https://github.com/BabacarNdaoKgl/cloud-config-repo-enda.git
+# ============================================================================
+
 server:
   port: 8080
 
@@ -5,22 +13,66 @@ spring:
   application:
     name: GETWAY_PVVIH
   # NE PAS désactiver le Config Server !
-  # spring.cloud.config.enabled: false  <- SUPPRIMER CETTE LIGNE
+  # spring.cloud.config.enabled: false  <- NE JAMAIS AJOUTER CETTE LIGNE
   cloud:
     gateway:
+      # Configuration HTTP Client
       httpclient:
-        connect-timeout: 10000
-        response-timeout: 30s
+        connect-timeout: 10000  # 10 secondes
+        response-timeout: 30s   # 30 secondes
+      
+      # Service Discovery
       discovery:
         locator:
           enabled: true  # Active la découverte automatique
           lower-case-service-id: true
+      
+      # ========================================================================
+      # CONFIGURATION CORS GLOBALE (IMPORTANT!)
+      # ========================================================================
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              # Développement local
+              - "http://localhost:3000"
+              - "http://localhost:3001"
+              - "http://localhost:3002"
+              - "http://localhost:3003"
+              - "http://127.0.0.1:3000"
+              - "http://127.0.0.1:3001"
+              - "http://127.0.0.1:3002"
+              - "http://127.0.0.1:3003"
+              # Production AWS EC2 (IP: 16.171.1.67)
+              - "http://16.171.1.67:3000"
+              - "http://16.171.1.67:3001"
+              - "http://16.171.1.67:3002"
+              - "http://16.171.1.67:3003"
+              - "http://16.171.1.67:8080"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+      
+      # Filtres par défaut appliqués à toutes les routes
       default-filters:
         - AddRequestHeader=X-Forwarded-Proto, http
         - AddRequestHeader=X-Forwarded-Host, gateway-pvvih:8080
         - PreserveHostHeader
+      
+      # ========================================================================
+      # ROUTES CONFIGURATION
+      # ========================================================================
       routes:
-        # Route pour USER_API_PVVIH - Auth endpoints avec rewrite (doit être AVANT la route directe)
+        # --------------------------------------------------------------------
+        # USER_API_PVVIH - Auth avec rewrite (DOIT ÊTRE AVANT route directe)
+        # --------------------------------------------------------------------
         - id: user-api-auth-rewrite
           uri: http://gestion-user:8080
           predicates:
@@ -30,68 +82,81 @@ spring:
             - RemoveRequestHeader=Cookie
             - RemoveRequestHeader=Set-Cookie
         
-        # Route pour USER_API_PVVIH - Auth endpoints directs (login, register)
+        # --------------------------------------------------------------------
+        # USER_API_PVVIH - Auth endpoints directs (login, register)
+        # --------------------------------------------------------------------
         - id: user-api-auth
           uri: http://gestion-user:8080
           predicates:
             - Path=/api/auth/**
-
-        # Route pour USER_API_PVVIH - Direct API endpoints (gère aussi /api/patients)
+        
+        # --------------------------------------------------------------------
+        # USER_API_PVVIH - Direct API endpoints (gère aussi /api/patients)
+        # --------------------------------------------------------------------
         - id: user-api-direct
           uri: http://gestion-user:8080
           predicates:
-            - Path=/api/users/**,/api/user/**,/api/auth/**,/api/user-auth/**,/api/doctors/**, /api/membres/**, /api/patients/**, /api/hospitaux/**, /api/associations/**, /api/assistants/**
-
-        # Route pour USER_API_PVVIH - Alternative spellings (need rewrite)
+            - Path=/api/users/**,/api/user/**,/api/doctors/**,/api/membres/**,/api/patients/**,/api/hospitaux/**,/api/associations/**,/api/assistants/**
+        
+        # --------------------------------------------------------------------
+        # USER_API_PVVIH - Variantes orthographiques (hopitaux/hospitaux)
+        # --------------------------------------------------------------------
         - id: user-api-alternatives
           uri: http://gestion-user:8080
           predicates:
-            - Path=/api/hopitaux/**, /hospitaux/**, /hopitaux/**
+            - Path=/api/hopitaux/**,/hospitaux/**,/hopitaux/**
           filters:
             - RewritePath=/api/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
             - RewritePath=/hospitaux/(?<path>.*), /api/hospitaux/$\{path}
             - RewritePath=/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
-
-        # Route pour USER_API_PVVIH - Service direct access
+        
+        # --------------------------------------------------------------------
+        # USER_API_PVVIH - Accès direct au service
+        # --------------------------------------------------------------------
         - id: user-api-service
           uri: http://gestion-user:8080
           predicates:
             - Path=/user_api_pvvih/**
           filters:
             - RewritePath=/user_api_pvvih/(?<path>.*), /$\{path}
-
-        # Route pour PATIENT_PVVIH - Dossiers médicaux (PAS /api/patients qui est dans user service)
+        
+        # --------------------------------------------------------------------
+        # PATIENT_PVVIH - Dossiers médicaux
+        # Note: /api/patients est géré par gestion-user
+        # --------------------------------------------------------------------
         - id: patient-pvvih
           uri: http://gestion-patient:8080
           predicates:
-            - Path=/api/patients-proxy/**, /api/dossiers/**, /api/user-integration/**, /patient_pvvih/**
+            - Path=/api/patients-proxy/**,/api/dossiers/**,/api/user-integration/**,/patient_pvvih/**
           filters:
             - RewritePath=/api/patients-proxy/(?<path>.*), /api/patients/$\{path}
             - RewritePath=/patient_pvvih/(?<path>.*), /$\{path}
-
-        # Route pour FORUM_PVVIH - toutes les routes
+        
+        # --------------------------------------------------------------------
+        # FORUM_PVVIH - Toutes les routes du forum
+        # --------------------------------------------------------------------
         - id: forum-pvvih
           uri: http://forum-pvvih:8080
           predicates:
-            - Path=/api/sujets/**, /api/commentaires/**, /api/translation/**, /api/forum-auth/**, /api/admin/sections/**, /forum_pvvih/**
+            - Path=/api/sujets/**,/api/commentaires/**,/api/translation/**,/api/forum-auth/**,/api/admin/sections/**,/forum_pvvih/**
           filters:
-            - RewritePath=/api/sujets/(?<path>.*), /$\{path}
-            - RewritePath=/api/commentaires/(?<path>.*), /$\{path}
-            - RewritePath=/api/translation/(?<path>.*), /$\{path}
             - RewritePath=/api/forum-auth/(?<path>.*), /api/auth/$\{path}
-            - RewritePath=/api/admin/sections/(?<path>.*), /$\{path}
             - RewritePath=/forum_pvvih/(?<path>.*), /$\{path}
-
-        # Route pour REFERENCEMENT_PVVIH - toutes les routes
+        
+        # --------------------------------------------------------------------
+        # REFERENCEMENT_PVVIH - Toutes les routes de référencement
+        # --------------------------------------------------------------------
         - id: referencement-pvvih
           uri: http://gestion-reference:8080
           predicates:
-            - Path=/api/references/**, /api/contre-references/**, /api/hopitaux-proxy/**, /api/integration/**, /api/reference-auth/**, /reference_pvvih/**
+            - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/reference_pvvih/**
           filters:
             - RewritePath=/api/reference-auth/(?<path>.*), /api/auth/$\{path}
             - RewritePath=/reference_pvvih/(?<path>.*), /$\{path}
 
-# Eureka configuration
+# ============================================================================
+# EUREKA CONFIGURATION
+# ============================================================================
 eureka:
   client:
     enabled: true
@@ -103,7 +168,9 @@ eureka:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${spring.application.instance_id:${server.port}}
 
-# Actuator
+# ============================================================================
+# ACTUATOR CONFIGURATION
+# ============================================================================
 management:
   endpoints:
     web:
@@ -115,12 +182,16 @@ management:
     health:
       show-details: always
 
-# Logging
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+# Pour production: utilisez INFO (changez en DEBUG si vous avez des problèmes)
+# Pour développement/debug: utilisez DEBUG
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.web.cors: DEBUG
-    reactor.netty: DEBUG
-    org.springframework.cloud.gateway.route: DEBUG
-    org.springframework.cloud.gateway.filter: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.springframework.web: INFO
+    org.springframework.web.cors: DEBUG  # Gardez DEBUG pour diagnostiquer CORS
+    reactor.netty: INFO
+    org.springframework.cloud.gateway.route: INFO
+    org.springframework.cloud.gateway.filter: INFO
