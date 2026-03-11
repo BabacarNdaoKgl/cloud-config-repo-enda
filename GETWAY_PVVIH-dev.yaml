@@ -76,7 +76,7 @@ spring:
         # USER_API_PVVIH - Auth avec rewrite (DOIT ÊTRE AVANT route directe)
         # --------------------------------------------------------------------
         - id: user-api-auth-rewrite
-          uri: lb://USER-API-PVVIH
+          uri: lb://USER_API_PVVIH
           predicates:
             - Path=/api/user-auth/**
           filters:
@@ -88,7 +88,7 @@ spring:
         # USER_API_PVVIH - Auth endpoints directs (login, register)
         # --------------------------------------------------------------------
         - id: user-api-auth
-          uri: lb://USER-API-PVVIH
+          uri: lb://USER_API_PVVIH
           predicates:
             - Path=/api/auth/**
         
@@ -96,7 +96,7 @@ spring:
         # USER_API_PVVIH - Direct API endpoints (gère aussi /api/patients)
         # --------------------------------------------------------------------
         - id: user-api-direct
-          uri: lb://USER-API-PVVIH
+          uri: lb://USER_API_PVVIH
           predicates:
             - Path=/api/users/**,/api/user/**,/api/doctors/**,/api/membres/**,/api/patients/**,/api/hospitaux/**,/api/associations/**,/api/assistants/**
         
@@ -104,7 +104,7 @@ spring:
         # USER_API_PVVIH - Variantes orthographiques (hopitaux/hospitaux)
         # --------------------------------------------------------------------
         - id: user-api-alternatives
-          uri: lb://USER-API-PVVIH
+          uri: lb://USER_API_PVVIH
           predicates:
             - Path=/api/hopitaux/**,/hospitaux/**,/hopitaux/**
           filters:
@@ -116,7 +116,7 @@ spring:
         # USER_API_PVVIH - Accès direct au service
         # --------------------------------------------------------------------
         - id: user-api-service
-          uri: lb://USER-API-PVVIH
+          uri: lb://USER_API_PVVIH
           predicates:
             - Path=/user_api_pvvih/**
           filters:
@@ -127,7 +127,7 @@ spring:
         # Note: /api/patients est géré par gestion-user
         # --------------------------------------------------------------------
         - id: patient-pvvih
-          uri: lb://PATIENT-API-PVVIH
+          uri: lb://PATIENT_API_PVVIH
           predicates:
             - Path=/api/patients-proxy/**,/api/dossiers/**,/api/user-integration/**,/patient_pvvih/**
           filters:
@@ -138,7 +138,7 @@ spring:
         # FORUM_PVVIH - Toutes les routes du forum
         # --------------------------------------------------------------------
         - id: forum-pvvih
-          uri: lb://FORUM-API-PVVIH
+          uri: lb://FORUM_API_PVVIH
           predicates:
             - Path=/api/sujets/**,/api/commentaires/**,/api/translation/**,/api/forum-auth/**,/api/admin/sections/**,/forum_pvvih/**
           filters:
@@ -149,7 +149,7 @@ spring:
         # REFERENCEMENT_PVVIH - Toutes les routes de référencement
         # --------------------------------------------------------------------
         - id: referencement-pvvih
-          uri: lb://REFERENCE-API-PVVIH
+          uri: lb://REFERENCE_API_PVVIH
           predicates:
             - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/reference_pvvih/**
           filters:
