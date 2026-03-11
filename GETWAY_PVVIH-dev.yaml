@@ -2,7 +2,7 @@
 # Configuration Spring Cloud Gateway pour GETWAY_PVVIH
 # ============================================================================
 # Fichier à placer dans votre repository GitHub de configuration
-# Nom: GETWAY_PVVIH-prod.yml (pour production)
+# Nom: GETWAY_PVVIH-dev.yml (pour développement)
 # URL du repo: https://github.com/BabacarNdaoKgl/cloud-config-repo-enda.git
 # ============================================================================
 
@@ -12,10 +12,6 @@ server:
 spring:
   application:
     name: GETWAY_PVVIH
-  
-  # NE PAS désactiver le Config Server !
-  # spring.cloud.config.enabled: false  <- NE JAMAIS AJOUTER CETTE LIGNE
-  
   cloud:
     gateway:
       # Configuration HTTP Client
@@ -69,14 +65,14 @@ spring:
         - PreserveHostHeader
       
       # ========================================================================
-      # ROUTES CONFIGURATION (CORRIGÉES AVEC lb:// POUR EUREKA)
+      # ROUTES CONFIGURATION (UTILISE URL DIRECTE AU LIEU DE lb://)
       # ========================================================================
       routes:
         # --------------------------------------------------------------------
         # USER_API_PVVIH - Auth avec rewrite (DOIT ÊTRE AVANT route directe)
         # --------------------------------------------------------------------
         - id: user-api-auth-rewrite
-          uri: lb://USER_API_PVVIH
+          uri: http://gestion-user:8080
           predicates:
             - Path=/api/user-auth/**
           filters:
@@ -88,7 +84,7 @@ spring:
         # USER_API_PVVIH - Auth endpoints directs (login, register)
         # --------------------------------------------------------------------
         - id: user-api-auth
-          uri: lb://USER_API_PVVIH
+          uri: http://gestion-user:8080
           predicates:
             - Path=/api/auth/**
         
@@ -96,7 +92,7 @@ spring:
         # USER_API_PVVIH - Direct API endpoints (gère aussi /api/patients)
         # --------------------------------------------------------------------
         - id: user-api-direct
-          uri: lb://USER_API_PVVIH
+          uri: http://gestion-user:8080
           predicates:
             - Path=/api/users/**,/api/user/**,/api/doctors/**,/api/membres/**,/api/patients/**,/api/hospitaux/**,/api/associations/**,/api/assistants/**
         
@@ -104,7 +100,7 @@ spring:
         # USER_API_PVVIH - Variantes orthographiques (hopitaux/hospitaux)
         # --------------------------------------------------------------------
         - id: user-api-alternatives
-          uri: lb://USER_API_PVVIH
+          uri: http://gestion-user:8080
           predicates:
             - Path=/api/hopitaux/**,/hospitaux/**,/hopitaux/**
           filters:
@@ -116,7 +112,7 @@ spring:
         # USER_API_PVVIH - Accès direct au service
         # --------------------------------------------------------------------
         - id: user-api-service
-          uri: lb://USER_API_PVVIH
+          uri: http://gestion-user:8080
           predicates:
             - Path=/user_api_pvvih/**
           filters:
@@ -127,7 +123,7 @@ spring:
         # Note: /api/patients est géré par gestion-user
         # --------------------------------------------------------------------
         - id: patient-pvvih
-          uri: lb://PATIENT_API_PVVIH
+          uri: http://gestion-patient:8080
           predicates:
             - Path=/api/patients-proxy/**,/api/dossiers/**,/api/user-integration/**,/patient_pvvih/**
           filters:
@@ -138,7 +134,7 @@ spring:
         # FORUM_PVVIH - Toutes les routes du forum
         # --------------------------------------------------------------------
         - id: forum-pvvih
-          uri: lb://FORUM_API_PVVIH
+          uri: http://forum-pvvih:8080
           predicates:
             - Path=/api/sujets/**,/api/commentaires/**,/api/translation/**,/api/forum-auth/**,/api/admin/sections/**,/forum_pvvih/**
           filters:
@@ -149,7 +145,7 @@ spring:
         # REFERENCEMENT_PVVIH - Toutes les routes de référencement
         # --------------------------------------------------------------------
         - id: referencement-pvvih
-          uri: lb://REFERENCE_API_PVVIH
+          uri: http://gestion-reference:8080
           predicates:
             - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/reference_pvvih/**
           filters:
@@ -181,19 +177,17 @@ management:
   endpoint:
     gateway:
       enabled: true
-  health:
-    show-details: always
+    health:
+      show-details: always
 
 # ============================================================================
 # LOGGING CONFIGURATION
 # ============================================================================
-# Pour production: utilisez INFO (changez en DEBUG si vous avez des problèmes)
-# Pour développement/debug: utilisez DEBUG
 logging:
   level:
     org.springframework.cloud.gateway: INFO
     org.springframework.web: INFO
-    org.springframework.web.cors: DEBUG  # Gardez DEBUG pour diagnostiquer CORS
+    org.springframework.web.cors: DEBUG
     reactor.netty: INFO
     org.springframework.cloud.gateway.route: INFO
     org.springframework.cloud.gateway.filter: INFO
