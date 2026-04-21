@@ -150,7 +150,7 @@ spring:
            - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/api/references-dossiers/**,/reference_pvvih/**
           filters:
             - RewritePath=/api/reference-auth/(?<path>.*), /api/auth/$\{path}
-            - RewritePath=/reference_pvvih/(?<path>.*), /$\{path}
+            - RewritePath=/reference_pvvih/(?<path>.*), /$\{path} 
 
 # ============================================================================
 # EUREKA CONFIGURATION
