@@ -102,12 +102,11 @@ spring:
         - id: user-api-alternatives
           uri: http://gestion-user:8080
           predicates:
-            - Path=/api/hopitaux/**,/hospitaux/**,/hopitaux/**,/api/hopitaux-proxy/**
+            - Path=/api/hopitaux/**,/hospitaux/**,/hopitaux/**
           filters:
             - RewritePath=/api/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
             - RewritePath=/hospitaux/(?<path>.*), /api/hospitaux/$\{path}
             - RewritePath=/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
-            - RewritePath=/api/hopitaux-proxy/(?<path>.*), /api/hospitaux/$\{path}
         
         # --------------------------------------------------------------------
         # USER_API_PVVIH - Accès direct au service
@@ -148,10 +147,10 @@ spring:
         - id: referencement-pvvih
           uri: http://gestion-reference:8080
           predicates:
-            - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/api/references-dossiers/**,/reference_pvvih/**
+           - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/api/references-dossiers/**,/reference_pvvih/**
           filters:
             - RewritePath=/api/reference-auth/(?<path>.*), /api/auth/$\{path}
-            - RewritePath=/reference_pvvih/(?<path>.*), /$\{path}
+            - RewritePath=/reference_pvvih/(?<path>.*), /$\{path} 
 
 # ============================================================================
 # EUREKA CONFIGURATION
@@ -190,4 +189,5 @@ logging:
     org.springframework.web: INFO
     org.springframework.web.cors: DEBUG
     reactor.netty: INFO
-    org.springframework.cloud.gateway
+    org.springframework.cloud.gateway.route: INFO
+    org.springframework.cloud.gateway.filter: INFO
