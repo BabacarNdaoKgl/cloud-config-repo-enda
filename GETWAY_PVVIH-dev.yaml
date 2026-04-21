@@ -41,7 +41,7 @@ spring:
               - "http://127.0.0.1:3001"
               - "http://127.0.0.1:3002"
               - "http://127.0.0.1:3003"
-              # Production GCP (IP: 34.32.116.206)
+              # Production GCP (IP: 34.28.161.231)
               - "http://16.171.10.0:3000"
               - "http://16.171.10.0:3001"
               - "http://-16.171.10.0:3002"
@@ -63,6 +63,7 @@ spring:
         - AddRequestHeader=X-Forwarded-Proto, http
         - AddRequestHeader=X-Forwarded-Host, gateway-pvvih:8080
         - PreserveHostHeader
+        - PreserveAuthorizationHeader
       
       # ========================================================================
       # ROUTES CONFIGURATION (UTILISE URL DIRECTE AU LIEU DE lb://)
@@ -149,10 +150,10 @@ spring:
         - id: referencement-pvvih
           uri: http://gestion-reference:8080
           predicates:
-           - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/api/references-dossiers/**,/reference_pvvih/**
+            - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/api/references-dossiers/**,/reference_pvvih/**
           filters:
             - RewritePath=/api/reference-auth/(?<path>.*), /api/auth/$\{path}
-            - RewritePath=/reference_pvvih/(?<path>.*), /$\{path} 
+            - RewritePath=/reference_pvvih/(?<path>.*), /$\{path}
 
 # ============================================================================
 # EUREKA CONFIGURATION
