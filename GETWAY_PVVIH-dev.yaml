@@ -63,7 +63,6 @@ spring:
         - AddRequestHeader=X-Forwarded-Proto, http
         - AddRequestHeader=X-Forwarded-Host, gateway-pvvih:8080
         - PreserveHostHeader
-        - AddRequestHeader=Authorization, #{request.headers.Authorization}
       
       # ========================================================================
       # ROUTES CONFIGURATION (UTILISE URL DIRECTE AU LIEU DE lb://)
@@ -132,6 +131,7 @@ spring:
           filters:
             - RewritePath=/api/patients-proxy/(?<path>.*), /api/patients/$\{path}
             - RewritePath=/patient_pvvih/(?<path>.*), /$\{path}
+            - AddRequestHeader=Authorization, Bearer #{request.headers.Authorization[0].replace('Bearer ', '')}
         
         # --------------------------------------------------------------------
         # FORUM_PVVIH - Toutes les routes du forum
