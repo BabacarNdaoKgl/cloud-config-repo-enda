@@ -63,7 +63,7 @@ spring:
         - AddRequestHeader=X-Forwarded-Proto, http
         - AddRequestHeader=X-Forwarded-Host, gateway-pvvih:8080
         - PreserveHostHeader
-        - PreserveAuthorizationHeader
+        - AddRequestHeader=Authorization, #{request.headers.Authorization}
       
       # ========================================================================
       # ROUTES CONFIGURATION (UTILISE URL DIRECTE AU LIEU DE lb://)
