@@ -41,10 +41,10 @@ spring:
               - "http://127.0.0.1:3001"
               - "http://127.0.0.1:3002"
               - "http://127.0.0.1:3003"
-              # Production GCP (IP: 34.32.116.206)
+              # Production GCP (IP: 34.28.161.231)
               - "http://16.171.10.0:3000"
               - "http://16.171.10.0:3001"
-              - "http://-16.171.10.0:3002"
+              - "http://16.171.10.0:3002"
               - "http://16.171.10.0:3003"
               - "http://16.171.10.0:8080"
             allowedMethods:
@@ -102,11 +102,13 @@ spring:
         - id: user-api-alternatives
           uri: http://gestion-user:8080
           predicates:
-            - Path=/api/hopitaux/**,/hospitaux/**,/hopitaux/**
+            - Path=/api/hopitaux/**,/hospitaux/**,/hopitaux/**,/api/hopitaux-proxy/**,/hopitaux-proxy/**
           filters:
             - RewritePath=/api/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
             - RewritePath=/hospitaux/(?<path>.*), /api/hospitaux/$\{path}
             - RewritePath=/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
+            - RewritePath=/api/hopitaux-proxy/(?<path>.*), /api/hospitaux/$\{path}
+            - RewritePath=/hopitaux-proxy/(?<path>.*), /api/hospitaux/$\{path}
         
         # --------------------------------------------------------------------
         # USER_API_PVVIH - Accès direct au service
@@ -129,6 +131,7 @@ spring:
           filters:
             - RewritePath=/api/patients-proxy/(?<path>.*), /api/patients/$\{path}
             - RewritePath=/patient_pvvih/(?<path>.*), /$\{path}
+            - AddRequestHeader=Authorization, Bearer #{request.headers.Authorization[0].replace('Bearer ', '')}
         
         # --------------------------------------------------------------------
         # FORUM_PVVIH - Toutes les routes du forum
@@ -147,10 +150,10 @@ spring:
         - id: referencement-pvvih
           uri: http://gestion-reference:8080
           predicates:
-           - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/api/references-dossiers/**,/reference_pvvih/**
+            - Path=/api/references/**,/api/contre-references/**,/api/hopitaux-proxy/**,/api/integration/**,/api/reference-auth/**,/api/references-dossiers/**,/reference_pvvih/**
           filters:
             - RewritePath=/api/reference-auth/(?<path>.*), /api/auth/$\{path}
-            - RewritePath=/reference_pvvih/(?<path>.*), /$\{path} 
+            - RewritePath=/reference_pvvih/(?<path>.*), /$\{path}
 
 # ============================================================================
 # EUREKA CONFIGURATION
