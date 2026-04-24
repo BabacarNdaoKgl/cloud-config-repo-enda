@@ -191,3 +191,5 @@ logging:
     reactor.netty: INFO
     org.springframework.cloud.gateway.route: INFO
     org.springframework.cloud.gateway.filter: INFO
+    sn.uasz.User_API_PVVIH.security: DEBUG
+    org.springframework.security: DEBUG
