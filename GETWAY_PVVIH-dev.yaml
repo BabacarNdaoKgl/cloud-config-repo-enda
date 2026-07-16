@@ -33,20 +33,20 @@ spring:
           '[/**]':
             allowedOrigins:
               # Développement local
-              - "http://localhost:3000"
-              - "http://localhost:3001"
-              - "http://localhost:3002"
-              - "http://localhost:3003"
-              - "http://127.0.0.1:3000"
-              - "http://127.0.0.1:3001"
-              - "http://127.0.0.1:3002"
-              - "http://127.0.0.1:3003"
+              - "https://localhost:3000"
+              - "https://localhost:3001"
+              - "https://localhost:3002"
+              - "https://localhost:3003"
+              - "https://127.0.0.1:3000"
+              - "https://127.0.0.1:3001"
+              - "https://127.0.0.1:3002"
+              - "https://127.0.0.1:3003"
               # Production GCP (IP: 34.32.116.206)
-              - "http://13.53.133.40:3000"
-              - "http://13.53.133.40:3001"
-              - "http://13.53.133.40:3002"
-              - "http://13.53.133.40:3003"
-              - "https://13.53.133.40:8080"
+              - "https://13.53.134.15:3000"
+              - "https://13.53.134.15:3001"
+              - "https://13.53.134.15:3002"
+              - "https://13.53.134.15:3003"
+              - "https://13.53.134.15:8080"
             allowedMethods:
               - GET
               - POST
