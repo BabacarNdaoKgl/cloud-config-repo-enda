@@ -18,13 +18,13 @@ spring:
       httpclient:
         connect-timeout: 10000  # 10 secondes
         response-timeout: 30s   # 30 secondes
-      
+
       # Service Discovery
       discovery:
         locator:
           enabled: true  # Active la découverte automatique
           lower-case-service-id: true
-      
+
       # ========================================================================
       # CONFIGURATION CORS GLOBALE - HTTPS SUPPORT
       # ========================================================================
@@ -41,16 +41,10 @@ spring:
               - "http://127.0.0.1:3001"
               - "http://127.0.0.1:3002"
               - "http://127.0.0.1:3003"
-              # Production HTTP AWS (IP: 100.48.20.109)
-              - "http://100.48.20.109:3000"
-              - "http://100.48.20.109:3001"
-              - "http://100.48.20.109:3002"
-              - "http://100.48.20.109:3003"
-              - "http://100.48.20.109:8080"
-              - "http://100.48.20.109"
               # Production HTTPS AWS (IP: 100.48.20.109)
+              # Note: Avec nginx-https, tous les frontends passent par le port 443
+              # Les ports 3001, 3002, 3003 ne sont PLUS exposés
               - "https://100.48.20.109"
-              - "https://100.48.20.109:443"
             allowedMethods:
               - GET
               - POST
@@ -61,13 +55,13 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
-      
+
       # Filtres par défaut appliqués à toutes les routes
       default-filters:
         - AddRequestHeader=X-Forwarded-Proto, http
         - AddRequestHeader=X-Forwarded-Host, gateway-pvvih:8080
         - PreserveHostHeader
-      
+
       # ========================================================================
       # ROUTES CONFIGURATION
       # ========================================================================
@@ -83,7 +77,7 @@ spring:
             - RewritePath=/api/user-auth/(?<path>.*), /api/auth/$\{path}
             - RemoveRequestHeader=Cookie
             - RemoveRequestHeader=Set-Cookie
-        
+
         # --------------------------------------------------------------------
         # USER_API_PVVIH - Auth endpoints directs (login, register)
         # --------------------------------------------------------------------
@@ -91,7 +85,7 @@ spring:
           uri: http://gestion-user:8080
           predicates:
             - Path=/api/auth/**
-        
+
         # --------------------------------------------------------------------
         # USER_API_PVVIH - Direct API endpoints (gère aussi /api/patients)
         # --------------------------------------------------------------------
@@ -99,7 +93,7 @@ spring:
           uri: http://gestion-user:8080
           predicates:
             - Path=/api/users/**,/api/user/**,/api/doctors/**,/api/membres/**,/api/patients/**,/api/hospitaux/**,/api/associations/**,/api/assistants/**
-        
+
         # --------------------------------------------------------------------
         # USER_API_PVVIH - Variantes orthographiques (hopitaux/hospitaux)
         # --------------------------------------------------------------------
@@ -111,7 +105,7 @@ spring:
             - RewritePath=/api/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
             - RewritePath=/hospitaux/(?<path>.*), /api/hospitaux/$\{path}
             - RewritePath=/hopitaux/(?<path>.*), /api/hospitaux/$\{path}
-        
+
         # --------------------------------------------------------------------
         # USER_API_PVVIH - Accès direct au service
         # --------------------------------------------------------------------
@@ -121,7 +115,7 @@ spring:
             - Path=/user_api_pvvih/**
           filters:
             - RewritePath=/user_api_pvvih/(?<path>.*), /$\{path}
-        
+
         # --------------------------------------------------------------------
         # PATIENT_PVVIH - Dossiers médicaux
         # Note: /api/patients est géré par gestion-user
@@ -133,7 +127,7 @@ spring:
           filters:
             - RewritePath=/api/patients-proxy/(?<path>.*), /api/patients/$\{path}
             - RewritePath=/patient_pvvih/(?<path>.*), /$\{path}
-        
+
         # --------------------------------------------------------------------
         # FORUM_PVVIH - Toutes les routes du forum
         # --------------------------------------------------------------------
@@ -144,7 +138,7 @@ spring:
           filters:
             - RewritePath=/api/forum-auth/(?<path>.*), /api/auth/$\{path}
             - RewritePath=/forum_pvvih/(?<path>.*), /$\{path}
-        
+
         # --------------------------------------------------------------------
         # REFERENCEMENT_PVVIH - Toutes les routes de référencement
         # --------------------------------------------------------------------
